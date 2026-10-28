@@ -1,0 +1,32 @@
+name: LatheGuard CI & Safety Gate
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  pytest-and-corpus-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y libgl1
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run 51-Test Unit, Chaos & Fail-Safe Matrix Suite
+        env:
+          LATHEGUARD_VISION_P95_MS: "10"
+        run: |
+          python -m pytest services/lathe_guard services/craft_twin/test_safety_math.py -q
+      - name: Run 20-Clip Quick Safety & Latency Corpus Gate
+        env:
+          LATHEGUARD_VISION_P95_MS: "10"
+        run: |
+          python services/lathe_guard/corpus/eval_corpus.py --quick

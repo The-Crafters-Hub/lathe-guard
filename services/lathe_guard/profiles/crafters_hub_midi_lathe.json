@@ -1,0 +1,14 @@
+{
+  "name": "crafters_hub_midi_lathe",
+  "display_name": "The Crafters Hub Standard Midi Lathe (Default)",
+  "roi": {"x0": 510, "y0": 240},
+  "axis_y": 300,
+  "x_stations": [120, 320, 520, 720],
+  "operator_side": "bottom",
+  "margin_px": 25,
+  "radius_clamp": [60, 160],
+  "px_per_mm": null,
+  "zones": {"headstock_x_max": 270, "tailstock_x_min": 570},
+  "fps": 60,
+  "mains_hz": 50
+}

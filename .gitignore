@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+/incidents/
+services/lathe_guard/incidents/*
+!services/lathe_guard/incidents/20261026_124445_2/
+services/lathe_guard/incidents/20261026_124445_2/*
+!services/lathe_guard/incidents/20261026_124445_2/report.md

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LatheGuard × CraftTwin — Physical-to-Virtual Twin Mirror Demo</title>
+  <style>
+    :root { --bg: #0b1014; --panel: #131c24; --accent: #38bdf8; --ok: #22c55e; --err: #ef4444; --warn: #f59e0b; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid #1e293b; margin-bottom: 18px; }
+    .badge { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: 1.45fr 1fr; gap: 18px; }
+    .card { background: var(--panel); border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
+    .controls { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    button, select { background: #1e293b; color: #f8fafc; border: 1px solid #334155; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    button.primary { background: #0284c7; border-color: #38bdf8; }
+    button.danger { background: #b91c1c; border-color: #f87171; }
+    .tier-box { margin-top: 10px; padding: 11px; border-radius: 8px; background: #0f172a; border-left: 4px solid var(--accent); font-size: 13px; line-height: 1.45; }
+    .rtl { direction: rtl; color: #fde047; margin-top: 4px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h2 style="font-size:20px;">LatheGuard Physical AI × CraftTwin Twin Mirror</h2>
+      <p style="font-size:12px;color:#94a3b8;">Nebius × NVIDIA Hackathon · 100Hz Deadman FSM + 3-Tier NVIDIA Nemotron Routing</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span id="relay-pill" class="badge" style="background:#15803d;">RELAY: 0x55 CLOSED [100Hz OK]</span>
+      <span id="ws-pill" class="badge" style="background:#334155;">OFFLINE SAMPLE REPLAY</span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <select id="lathe-select" onchange="switchLathe(this.value)">
+      <option value="mc1018">Master Craft MC1018 (Yellow Midi · 250mm Swing · 450mm Bed · MT2)</option>
+      <option value="fox">FOX F46-717 (Grey Heavy · 300mm Swing · 1000mm Bed · Reeves 500-2000 RPM)</option>
+      <option value="wl300">Wood Lathe WL300 (Blue Mini · 200mm Swing · 305mm Bed · EVS 750-3200 RPM)</option>
+    </select>
+    <button class="danger" onclick="simulateBreach('CENTER', 412, 388, 2)">Simulate Operator Hand Breach (y &gt; 300)</button>
+    <button class="primary" onclick="simulateBreach('HEADSTOCK', 195, 395, 1)">Simulate Chuck Collar Breach (H-01)</button>
+    <button onclick="resetArmed()">Reset &amp; Re-Arm (0x55)</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <svg id="lathe-svg" viewBox="0 0 900 600" style="width:100%;background:#090d11;border-radius:8px;border:1px solid #334155;">
+        <!-- Bed Ways -->
+        <rect x="60" y="265" width="780" height="70" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <!-- Headstock (x < 270) & Tailstock (x > 570) -->
+        <rect id="hs-box" x="60" y="190" width="110" height="220" rx="8" fill="#eab308" stroke="#fef08a" stroke-width="2"/>
+        <text x="115" y="180" fill="#94a3b8" font-size="13" text-anchor="middle">HEADSTOCK (Chuck)</text>
+        <rect id="ts-box" x="720" y="215" width="110" height="170" rx="8" fill="#eab308" stroke="#fef08a" stroke-width="2"/>
+        <text x="775" y="205" fill="#94a3b8" font-size="13" text-anchor="middle">TAILSTOCK (MT)</text>
+        <!-- Spinning Wood Blank -->
+        <rect x="170" y="210" width="550" height="180" fill="#b45309" stroke="#fcd34d" stroke-width="2"/>
+        <line x1="60" y1="300" x2="840" y2="300" stroke="#22c55e" stroke-dasharray="6,6" stroke-width="1.5"/>
+        <text x="445" y="293" fill="#bbf7d0" font-size="12" text-anchor="middle">SPINDLE AXIS (Y = 300)</text>
+        <!-- Dynamic Red-Zone Polygon -->
+        <polygon id="rz-poly" points="120,175 320,175 520,175 720,175 720,425 520,425 320,425 120,425"
+                 fill="rgba(34,197,94,0.16)" stroke="#22c55e" stroke-width="3"/>
+        <!-- Operator Side Label (Bottom y > 300, H-1) -->
+        <text x="450" y="575" fill="#38bdf8" font-size="14" font-weight="bold" text-anchor="middle">
+          ▲ OPERATOR APPROACH SIDE (Bottom Quadrant y &gt; 300 · Tool Rest &amp; Hands) ▲
+        </text>
+        <!-- Breach Crosshair Marker -->
+        <g id="breach-marker" style="display:none;">
+          <circle id="bm-circle" cx="412" cy="388" r="22" fill="rgba(239,68,68,0.35)" stroke="#ef4444" stroke-width="3"/>
+          <line id="bm-h" x1="384" y1="388" x2="440" y2="388" stroke="#fde047" stroke-width="2"/>
+          <line id="bm-v" x1="412" y1="360" x2="412" y2="416" stroke="#fde047" stroke-width="2"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:16px;margin-bottom:8px;">3-Tier Nebius × NVIDIA Nemotron Telemetry</h3>
+      <div id="tier0-box" class="tier-box">
+        <b>Tier 0 — Local Deterministic Template (&lt; 5 ms, Offline-First):</b>
+        <div id="t0-en" style="margin-top:4px;color:#cbd5e1;">System armed. Monitoring 8-vertex dynamic Red-Zone at 100Hz.</div>
+        <div id="t0-ar" class="rtl">النظام جاهز ومسلّح — مراقبة منطقة الدوران بسرعة ١٠٠ هرتز.</div>
+      </div>
+      <div id="tier1-box" class="tier-box" style="border-left-color:#a855f7;">
+        <b>Tier 1 — NVIDIA Nemotron-3_5-Lightning (Nebius Token Factory ~604 ms):</b>
+        <div id="t1-text" style="margin-top:4px;color:#cbd5e1;">Awaiting state transition...</div>
+      </div>
+      <div id="tier2-box" class="tier-box" style="border-left-color:#f59e0b;">
+        <b>Tier 2 — NVIDIA Nemotron-3-Ultra-550b-a55b + Tavily Search (Async NEBOSH Incident Note):</b>
+        <div id="t2-text" style="margin-top:4px;color:#cbd5e1;">No active incident report.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const LATHE_COLORS = { mc1018: "#eab308", fox: "#94a3b8", wl300: "#2563eb" };
+    const LATHE_POLYS = {
+      mc1018: "120,175 320,175 520,175 720,175 720,425 520,425 320,425 120,425",
+      fox: "120,150 320,150 520,150 720,150 720,450 520,450 320,450 120,450",
+      wl300: "120,200 320,200 520,200 720,200 720,400 520,400 320,400 120,400"
+    };
+    function switchLathe(key) {
+      const c = LATHE_COLORS[key] || "#eab308";
+      document.getElementById("hs-box").setAttribute("fill", c);
+      document.getElementById("ts-box").setAttribute("fill", c);
+      const pts = LATHE_POLYS[key] || LATHE_POLYS.mc1018;
+      document.getElementById("rz-poly").setAttribute("points", pts);
+    }
+
+    function applyBreachEvent(ev) {
+      const poly = document.getElementById("rz-poly");
+      poly.setAttribute("fill", "rgba(239,68,68,0.28)");
+      poly.setAttribute("stroke", "#ef4444");
+      const pill = document.getElementById("relay-pill");
+      pill.style.background = "#b91c1c";
+      pill.textContent = "RELAY: 0xFF OPEN [E-STOP CUT!]";
+
+      const [x, y] = ev.roi_xy || [412, 388];
+      const mk = document.getElementById("breach-marker");
+      mk.style.display = "block";
+      document.getElementById("bm-circle").setAttribute("cx", x);
+      document.getElementById("bm-circle").setAttribute("cy", y);
+      document.getElementById("bm-h").setAttribute("x1", x - 26);
+      document.getElementById("bm-h").setAttribute("x2", x + 26);
+      document.getElementById("bm-h").setAttribute("y1", y);
+      document.getElementById("bm-h").setAttribute("y2", y);
+      document.getElementById("bm-v").setAttribute("x1", x);
+      document.getElementById("bm-v").setAttribute("x2", x);
+      document.getElementById("bm-v").setAttribute("y1", y - 26);
+      document.getElementById("bm-v").setAttribute("y2", y + 26);
+
+      document.getElementById("t0-en").textContent = `[${ev.fault_name} | ${ev.zone} / ${ev.side} | ${ev.hazard_code}] ${ev.advice_en}`;
+      document.getElementById("t0-ar").textContent = ev.advice_ar;
+    }
+
+    function simulateBreach(zone, x, y, faultCode) {
+      const isCollar = faultCode === 1;
+      const ev = {
+        type: "breach_event",
+        tier: 0,
+        fault_code: faultCode,
+        fault_name: isCollar ? "COLLAR" : "HAND_OR_TOOL_MOAT",
+        hazard_code: zone === "HEADSTOCK" ? "H-01" : (isCollar ? "H-03" : "H-02"),
+        roi_xy: [x, y],
+        norm_xy: [x / 900, y / 600],
+        zone: zone,
+        side: "OPERATOR",
+        advice_en: `STOP! ${isCollar ? "Tool collar" : "Hand or chisel"} breached the ${zone} Red-Zone from the OPERATOR side. Withdraw clear and set the tool rest within 3 mm.`,
+        advice_ar: "قف فوراً يا صنايعي! يدك أو الإزميل دخل منطقة الخطر. ارفع يدك وأعد ضبط المسند على بعد ٣ مم قبل إعادة التشغيل."
+      };
+      applyBreachEvent(ev);
+      document.getElementById("t1-text").textContent = "Calling Nebius Token Factory (nvidia/Nemotron-3_5-Lightning)...";
+      setTimeout(() => {
+        document.getElementById("t1-text").textContent =
+          `[SAMPLE - recorded live Nebius call: 604 ms · 357 tokens] Diagnosis: Operator ${isCollar ? "collar over-reach" : "hand intrusion"} into the ${zone} pinch envelope (${ev.hazard_code}). ` +
+          `Corrective Action: Lock spindle, verify 3 mm tool-rest clearance, and keep thumb behind the ferrule. سلامتك أولاً — Safety first at the lathe.`;
+      }, 320);
+      setTimeout(() => {
+        document.getElementById("t2-text").textContent =
+          `[SAMPLE report - illustrative · Mapped to CraftTwin ${ev.hazard_code}] Engineering Control: 100Hz Deadman Relay tripped (0xFF). ` +
+          `Pedagogical Control: Rehearse ${zone} tool-rest spacing (<= 3 mm, no gloves · Tavily Search: 3 OSHA/AAW sources cited) in CraftTwin VR before physical re-arm.`;
+      }, 650);
+    }
+
+    function resetArmed() {
+      const poly = document.getElementById("rz-poly");
+      poly.setAttribute("fill", "rgba(34,197,94,0.16)");
+      poly.setAttribute("stroke", "#22c55e");
+      const pill = document.getElementById("relay-pill");
+      pill.style.background = "#15803d";
+      pill.textContent = "RELAY: 0x55 CLOSED [100Hz OK]";
+      document.getElementById("breach-marker").style.display = "none";
+      document.getElementById("t0-en").textContent = "System armed. Monitoring 8-vertex dynamic Red-Zone at 100Hz.";
+      document.getElementById("t0-ar").textContent = "النظام جاهز ومسلّح — مراقبة منطقة الدوران بسرعة ١٠٠ هرتز.";
+      document.getElementById("t1-text").textContent = "Awaiting state transition...";
+      document.getElementById("t2-text").textContent = "No active incident report.";
+    }
+
+    try {
+      const ws = new WebSocket("ws://127.0.0.1:8766");
+      ws.onopen = () => {
+        const p = document.getElementById("ws-pill");
+        p.style.background = "#0284c7";
+        p.textContent = "LIVE WS :8766 CONNECTED";
+      };
+      ws.onmessage = (m) => {
+        const d = JSON.parse(m.data);
+        if (d.type === "breach_event") applyBreachEvent(d);
+        if (d.type === "nebius_coaching") document.getElementById("t1-text").textContent = `[${Math.round(d.latency_ms||0)} ms] ${d.advice}`;
+        if (d.type === "incident_report") document.getElementById("t2-text").textContent = `[${d.incident_dir} · Tavily: ${d.tavily_sources || 0} sources] ${d.summary}`;
+      };
+    } catch (e) {}
+  </script>
+</body>
+</html>

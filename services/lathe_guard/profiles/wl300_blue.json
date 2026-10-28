@@ -1,0 +1,24 @@
+{
+  "name": "wl300_blue",
+  "display_name": "Wood Lathe WL300 Compact Precision Mini Lathe (Blue)",
+  "specs": {
+    "center_height_mm": 100,
+    "swing_over_bed_mm": 200,
+    "distance_between_centers_mm": 305,
+    "spindle_thread": "3/4x16_TPI",
+    "morse_taper": "MT1",
+    "motor_watts": 250,
+    "drive_type": "Electronic Variable Speed (EVS)",
+    "rpm_range": [750, 3200]
+  },
+  "roi": {"x0": 510, "y0": 240},
+  "axis_y": 300,
+  "x_stations": [120, 320, 520, 720],
+  "operator_side": "bottom",
+  "margin_px": 25,
+  "radius_clamp": [55, 150],
+  "px_per_mm": 1.5,
+  "zones": {"headstock_x_max": 270, "tailstock_x_min": 570},
+  "fps": 60,
+  "mains_hz": 50
+}

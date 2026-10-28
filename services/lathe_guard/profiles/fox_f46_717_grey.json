@@ -1,0 +1,24 @@
+{
+  "name": "fox_f46_717_grey",
+  "display_name": "FOX F46-717 Heavy Floor-Standing Swivel-Head Lathe (Grey)",
+  "specs": {
+    "center_height_mm": 150,
+    "swing_over_bed_mm": 300,
+    "distance_between_centers_mm": 1000,
+    "spindle_thread": "M33x3.5",
+    "morse_taper": "MT2",
+    "motor_watts": 750,
+    "drive_type": "Mechanical Reeves Variable Pulley (10 detents)",
+    "rpm_range": [500, 2000]
+  },
+  "roi": {"x0": 510, "y0": 240},
+  "axis_y": 300,
+  "x_stations": [120, 320, 520, 720],
+  "operator_side": "bottom",
+  "margin_px": 25,
+  "radius_clamp": [60, 165],
+  "px_per_mm": 1.0,
+  "zones": {"headstock_x_max": 270, "tailstock_x_min": 570},
+  "fps": 60,
+  "mains_hz": 50
+}

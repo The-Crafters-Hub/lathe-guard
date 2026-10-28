@@ -1,0 +1,24 @@
+{
+  "name": "mc1018_yellow",
+  "display_name": "Master Craft MC1018 Benchtop Midi Lathe (Yellow)",
+  "specs": {
+    "center_height_mm": 125,
+    "swing_over_bed_mm": 250,
+    "distance_between_centers_mm": 450,
+    "spindle_thread": "1x8_TPI",
+    "morse_taper": "MT2",
+    "motor_watts": 370,
+    "drive_type": "5-Step Pulley Belt",
+    "rpm_range": [500, 2500]
+  },
+  "roi": {"x0": 510, "y0": 240},
+  "axis_y": 300,
+  "x_stations": [120, 320, 520, 720],
+  "operator_side": "bottom",
+  "margin_px": 25,
+  "radius_clamp": [60, 160],
+  "px_per_mm": 1.2,
+  "zones": {"headstock_x_max": 270, "tailstock_x_min": 570},
+  "fps": 60,
+  "mains_hz": 50
+}
