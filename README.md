@@ -34,7 +34,7 @@ Woodturning lathes spin hardwood blanks at **500 to 3,200 RPM**. In vocational w
    - Polls SHM read-only at `5 Hz` off the real-time path and routes every safety event through **3 tiers**:
      - **Tier 0 (`< 5 ms`, Offline-First Local Template):** Instant bilingual (**Arabic + English**) warning keyed by `(FaultCode, Zone, Side)`, broadcast over WebSocket `:8766` as `breach_event` **before** any network socket is opened.
      - **Tier 1 (`~604 ms` measured, `nvidia/Nemotron-3_5-Lightning` via Nebius Token Factory):** Contextual master-artisan (*"Osta"*) diagnosis and OSHA/AAW corrective instruction via non-blocking `asyncio.to_thread`.
-     - **Tier 2 (Async Post-Trip, `nvidia/Nemotron-3-Ultra-550b-a55b` via Nebius Token Factory):** Generates a structured **NEBOSH-style incident report** (`incidents/<timestamp>_<code >/report.md`) mapped to CraftTwin hazard codes `H-01..H-04`.
+     - **Tier 2 (Async Post-Trip, `nvidia/Nemotron-3-Ultra-550b-a55b` via Nebius Token Factory + live Tavily Search API):** Generates a structured **NEBOSH-style incident report** (e.g., [`services/lathe_guard/incidents/20261026_124445_2/report.md`](services/lathe_guard/incidents/20261026_124445_2/report.md)) mapped to CraftTwin hazard codes `H-01..H-04` and grounded with live OSHA 1910.213 / AAW citations.
 3. **Physical-to-Virtual "Twin Mirror" (`twin_mirror_demo.html` & `lathe_guard_bridge.js`):**
    - Mirrors physical workshop trips directly into the **CraftTwin 3D Simulator**, placing a spatial breach marker at `norm_xy`, triggering virtual E-STOP, playing synthetic Virtual Osta audio (`osta_safety_trip.mp3`), and turning real studio near-misses into rehearsable training scenarios.
 
