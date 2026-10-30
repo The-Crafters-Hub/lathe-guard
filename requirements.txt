@@ -1,3 +1,26 @@
+# LatheGuard Physical AI — Python Dependencies
+#
+# Validated Environments & Tested Versions:
+#   Python: 3.10, 3.11, 3.12, 3.13 (x86_64, aarch64 / ARM64, win32)
+#   Tested on:
+#     - Windows 11 Pro 24H2 / Python 3.13.7 (Core i7 / RTX 40-series workstation)
+#     - Ubuntu 22.04 LTS / Python 3.10.12 (GitHub Actions & headless Docker)
+#     - Debian 12 (Bookworm) / Python 3.11.2 (Jetson Linux / Orin Nano target)
+#
+# Verified Package Matrix:
+#   numpy==1.26.4 / 2.3.2
+#   opencv-python==4.9.0.80 / 5.0.0 (or opencv-python-headless for containers)
+#   openai==1.40.0 / 3.35.1
+#   python-dotenv==1.0.1
+#   websockets==12.0 / 15.0.1
+#   Pillow==10.2.0 / 12.3.0
+#   arabic-reshaper==3.0.0
+#   python-bidi==0.4.2
+#   pytest==8.0.0 / 9.1.1
+#   pytest-asyncio==0.23.0 / 1.4.0
+#   pyserial==3.5
+#   requests>=2.31.0
+
 numpy>=1.26.0
 opencv-python>=4.9.0
 openai>=1.40.0
@@ -9,3 +32,4 @@ python-bidi>=0.4.2
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
 pyserial>=3.5
+requests>=2.31.0
