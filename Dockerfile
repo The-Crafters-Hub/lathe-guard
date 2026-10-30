@@ -26,3 +26,4 @@ COPY . .
 # Override example (headless demo):
 #   docker run --rm lathe-guard python services/lathe_guard/run_lathe_guard.py --mock --no-nebius --duration 8
 CMD ["python", "-m", "pytest", "services/"]
+

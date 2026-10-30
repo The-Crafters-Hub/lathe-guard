@@ -45,11 +45,13 @@ Woodturning lathes spin hardwood blanks at **500 to 3,200 RPM**. In vocational w
 LatheGuard runs out-of-the-box on **Windows, Linux, and macOS** (Windows-only kernel affinity/timer calls degrade cleanly to no-ops on POSIX).
 
 ```bash
-# 1. Install dependencies
+# Option A: Local Python
 pip install -r requirements.txt
-
-# 2. Run 8-second zero-hardware synthetic breach simulation (Offline Tier-0 mode)
 python services/lathe_guard/run_lathe_guard.py --mock --visual-breach-after 2 --duration 8 --no-nebius
+
+# Option B: Docker (Containerized Linux Runtime & Test Suite)
+docker build -t lathe-guard .
+docker run --rm lathe-guard
 
 # 3. Replay a recorded workshop breach clip with HUD v2 & visual relay indicator (--mock-serial)
 python services/lathe_guard/run_lathe_guard.py \

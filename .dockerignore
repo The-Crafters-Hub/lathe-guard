@@ -8,3 +8,4 @@ __pycache__
 .env
 services/lathe_guard/incidents/*
 !services/lathe_guard/incidents/20261026_124445_2/
+
