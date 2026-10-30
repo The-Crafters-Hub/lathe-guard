@@ -38,14 +38,18 @@ def test_hazard_context_degraded():
 
 
 def test_nebius_client_initialized():
-    from nebius_hazard_advisor import nebius_client, NEBIUS_BASE_URL
+    from nebius_hazard_advisor import nebius_client, NEBIUS_BASE_URL, build_nebius_client
     assert nebius_client is not None
     assert "nebius" in NEBIUS_BASE_URL.lower() or "api" in NEBIUS_BASE_URL.lower()
+    c_org = build_nebius_client(api_key="TEST_KEY", organization="test_tenant_org")
+    assert getattr(c_org, "organization", None) == "test_tenant_org"
 
 
 def test_model_name_set():
-    from nebius_hazard_advisor import NEBIUS_MODEL
+    from nebius_hazard_advisor import NEBIUS_MODEL, discover_report_model
     assert "nemotron" in NEBIUS_MODEL.lower() or "llama" in NEBIUS_MODEL.lower() or "nvidia" in NEBIUS_MODEL.lower()
+    discovered = discover_report_model(client=None)
+    assert discovered is not None and len(discovered) > 0
 
 
 def test_cooldown_constant():

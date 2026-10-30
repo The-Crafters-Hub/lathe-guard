@@ -185,17 +185,19 @@ def build_nebius_client(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     timeout: float = 4.0,
+    organization: Optional[str] = None,
 ) -> Optional[Any]:
     """Creates a non-retrying timeout-bounded Nebius OpenAI client, or None if no key is configured."""
     global _OFFLINE_WARNED
     key = NEBIUS_API_KEY if api_key is None else api_key.strip()
     url = NEBIUS_BASE_URL if base_url is None else base_url.strip()
+    org = (NEBIUS_ORG_ID if organization is None else organization).strip() or None
     if not key or OpenAI is None:
         if not _OFFLINE_WARNED:
             _safe_print("[NEBIUS ADVISOR] No NEBIUS_API_KEY configured - running in offline-first Tier-0 local mode.")
             _OFFLINE_WARNED = True
         return None
-    return OpenAI(api_key=key, base_url=url, timeout=timeout, max_retries=0)
+    return OpenAI(api_key=key, base_url=url, organization=org, timeout=timeout, max_retries=0)
 
 
 nebius_client = build_nebius_client()
@@ -508,8 +510,9 @@ async def get_nebius_coaching(
 def discover_report_model(client: Any = _UNSET) -> str:
     """T2.5: Discovers the largest available NVIDIA Nemotron model on Nebius Token Factory (cached)."""
     global _cached_report_model
-    if NEBIUS_REPORT_MODEL:
-        return NEBIUS_REPORT_MODEL
+    report_override = NEBIUS_REPORT_MODEL or os.environ.get("NEBIUS_REPORT_MODEL", "").strip()
+    if report_override:
+        return report_override
     if _cached_report_model:
         return _cached_report_model
 
