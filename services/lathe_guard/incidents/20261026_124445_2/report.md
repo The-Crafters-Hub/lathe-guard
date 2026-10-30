@@ -3,7 +3,7 @@
 - **Timestamp (UTC):** 2026-10-26T12:44:44.336782+00:00
 - **Model:** `nvidia/Nemotron-3-Ultra-550b-a55b`
 
-### **INCIDENT REPORT: CR-HUB-2024-0412**
+### **INCIDENT REPORT: CR-HUB-2026-1026-02**
 **Classification:** NEBOSH / OSHA 1910.213 Compliance Audit
 **Status:** Safety Interlock Triggered (Auto-Arm Inhibited)
 

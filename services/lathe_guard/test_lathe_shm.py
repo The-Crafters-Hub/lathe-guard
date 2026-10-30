@@ -5,8 +5,10 @@ The Crafters Hub | The Cabinet AI Automation
 
 import ctypes
 import multiprocessing as mp
+import sys
 import time
 import numpy as np
+import pytest
 from lathe_shm import (
     AlignedShmHeader,
     FaultCode,
@@ -103,6 +105,10 @@ def main():
     print("[PASS] Module 1 Seqlock IPC Verified Zero-Corruption.")
 
 
+@pytest.mark.skipif(
+    sys.platform != "win32",
+    reason="Windows-specific SHM re-attach behavior during writer rearm"
+)
 def test_shm_recreate_with_active_reader_and_seq_reset():
     """Verify Windows SharedMemory re-attach on writer restart (--demo-rearm) and reader seq reset."""
     shm_name = "cabinet_shm_rearm_unit_test"
